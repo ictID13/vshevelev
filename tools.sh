@@ -386,20 +386,20 @@ tab
 echo ""
 echo ""
 
-#for IPS in ${IP}; do
-#            tab
-#            disconnect
-#            echo "Try connect to ${IPS}"
-#            timeout 1 adb connect ${IPS}:5555  2> /dev/null 1> /dev/null
-#            if [ $? -ne 0 ] ; then
-#        echo "Failed to connect"
-#    fi
-#    echo "Success"
-#    #####    return 0
-#  sleep 1
-#  echo -n "abox.store.client : "
-#  adb shell dumpsys package abox.store.client | grep -i versionName | awk -F"=" '{print $2}'
-#  echo ""
+for IPS in ${IP}; do
+            tab
+            disconnect
+            echo "Try connect to ${IPS}"
+            timeout 1 adb connect ${IPS}:5555  2> /dev/null 1> /dev/null
+            if [ $? -ne 0 ] ; then
+        echo "Failed to connect"
+    fi
+    echo "Success"
+    #####    return 0
+  sleep 1
+  echo -n "abox.store.client : "
+  adb shell dumpsys package abox.store.client | grep -i versionName | awk -F"=" '{print $2}'
+  echo ""
 #  sleep 1
 #  adb shell getprop |grep -E "(sys.wildred.hw_id|sys.wildred.brand|ro.build.version.min_supported_target_sdk|ro.build.version.sdk)"
 #  echo "reboot "
