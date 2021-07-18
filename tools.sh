@@ -133,7 +133,13 @@ connect2all_send_broadcast(){
     fi
     echo "Success"
 #    return 0
-adb shell reboot
+getprop
+#echo > ${MODULES_UNINSTALL}
+adb uninstall abox.store.client
+
+#get_app_name >> ${MODULES_UNINSTALL}
+#uninstall_pack_apk
+
     done
   disconnect
     }
@@ -251,7 +257,7 @@ uninstall_pack_apk(){
             echo "Uninstalling apk ${APK}"
             adb shell pm uninstall -k ${APK} #2>/dev/null 1>/dev/null
             if [ $? -ne 0 ] ; then
-        echo "Failed to install ${APK}"
+        echo "Failed to uninstall ${APK}"
     fi
 
     done
@@ -259,7 +265,7 @@ uninstall_pack_apk(){
 
 
 get_app_name() {
-    echo "Получение списка имен пакетов"
+#    echo "Получение списка имен пакетов"
     CMD='adb shell "pm list packages -f" | sed -e "s/==//"'
     PACKAGES=$(eval ${CMD} | cut -f 2 -d "=")
 #    echo  ${PACKAGES}
@@ -267,9 +273,8 @@ get_app_name() {
 	    echo "No packages found"
 	    exit 0
     fi
-    echo "Found packages: ${#PACKAGES[@]}"
     for PA in "${PACKAGES[@]}"; do
-	echo -e  "${PA}\n"    
+	echo -e  "${PA}\n"
 
     done
     }
@@ -298,7 +303,7 @@ get_logcat(){
 get_app_name_version() {
   echo "Получение списка пакетов и их версий"
 #    android_get_installed_packages.sh > ${APPDEF}
-
+#
     CMD='adb shell "pm list packages -f" | ssed -e "s/==//"'
     PACKAGES=($(eval ${CMD} | cut -f 2 -d "="))
 
@@ -386,20 +391,6 @@ tab
 echo ""
 echo ""
 
-for IPS in ${IP}; do
-            tab
-            disconnect
-            echo "Try connect to ${IPS}"
-            timeout 1 adb connect ${IPS}:5555  2> /dev/null 1> /dev/null
-            if [ $? -ne 0 ] ; then
-        echo "Failed to connect"
-    fi
-    echo "Success"
-    #####    return 0
-  sleep 1
-  echo -n "abox.store.client : "
-  adb shell dumpsys package abox.store.client | grep -i versionName | awk -F"=" '{print $2}'
-  echo ""
 #  sleep 1
 #  adb shell getprop |grep -E "(sys.wildred.hw_id|sys.wildred.brand|ro.build.version.min_supported_target_sdk|ro.build.version.sdk)"
 #  echo "reboot "
