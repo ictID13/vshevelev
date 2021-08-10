@@ -9,6 +9,7 @@ K_GETPROP="--getprop"
 K_INSTALL="--install"
 K_INSTALL_PAK="--install_pack_apk"
 K_LOGCAT="--get_logcat"
+K_OPEN_FACT="--open_factory"
 K_UNINST="--uninstall"
 K_UNINST_PAK="--uninstall_pack_apk"
 K_UNINST_DIFF="--uninstall_diff_apk"
@@ -22,7 +23,8 @@ K_MONKEY="--monkey_test"
 K_CLEAR_DATA="--clear_data"
 K_RFAV="--readfromapkversion"
 K_HELP="--help"
-ALL_KEYWORDS=( "${K_INSTALL}" "${K_RFAV}" "${K_GETPROP}" "${K_GET_IP}" "${K_MONKEY}" "${K_CONNECT}" "${K_DISCONNECT}" "${K_CONNECT2ALL_SEND_BROADCAST}" "${K_INSTALL_PAK}" "${K_LOGCAT}" "${K_UNINST}" "${K_UNINST_PAK}" "${K_UNINST_DIFF}" "${K_SEND}" "${K_STOP_APP}" "${K_GET_NAME}" "${K_GET_VERS}" "${K_DIFF_VERSION}" "${K_CLEAR_DATA}" "${K_FIND}" "${K_HELP}")
+
+ALL_KEYWORDS=( "${K_OPEN_FACT}" "${K_INSTALL}" "${K_RFAV}" "${K_GETPROP}" "${K_GET_IP}" "${K_MONKEY}" "${K_CONNECT}" "${K_DISCONNECT}" "${K_CONNECT2ALL_SEND_BROADCAST}" "${K_INSTALL_PAK}" "${K_LOGCAT}" "${K_UNINST}" "${K_UNINST_PAK}" "${K_UNINST_DIFF}" "${K_SEND}" "${K_STOP_APP}" "${K_GET_NAME}" "${K_GET_VERS}" "${K_DIFF_VERSION}" "${K_CLEAR_DATA}" "${K_FIND}" "${K_HELP}")
 
 ###################Стартовые переменные#####################
 TOOL=~/.tool/
@@ -190,7 +192,9 @@ install_pack_apk(){
 getprop(){
 echo "Получение getprop:"
 adb shell getprop |grep -E "(sys.wildred.hw_id|sys.wildred.brand|ro.product.brand|ro.product.device|ro.product.model|sys.wildred.version|ro.build.version.min_supported_target_sdk|ro.build.version.sdk|ro.build.date.utc|ro.build.date|ro.sf.lcd_density|qemu.sf.lcd_density|vendor.display-size|smarttv.current.apk.activity|smarttv.current.apk.package|ro.main.version|ro.main.version.date)"
+
 # > ~/.tool/${IPS}.txt
+
 }
 
 
@@ -213,6 +217,11 @@ stop_app(){
     echo "Остановка abox.store.client"
     adb shell am force-stop ${PKG:=abox.store.client}
     }
+
+restart_app() {
+    stop_app
+    launch_activity
+}
 
 #Установка prop
 setprop(){
@@ -296,8 +305,21 @@ send_exec(){
 get_logcat(){
     echo -n "Show logcat | grep by word?:"
     read FD
-    adb shell logcat |  grep ${FD}
+    adb shell logcat |  grep "${FD}"
     }
+
+launch_activity() {
+    adb_all shell am start -n "$PKG/$ACTIVITY" -a android.intent.action.MAIN -c android.intent.category.LAUNCHER
+}
+tree() {
+    adb_all shell "ls -lahR /data/data/${PKG}"
+}
+########################################
+prefs() {
+    adb_all shell "cat /data/data/${PKG}/shared_prefs/*.xml"
+}
+
+
 
 #Получение установленных приложений и их версий с записью в файл
 get_app_name_version() {
@@ -342,6 +364,25 @@ send_broadcast_store_client(){
       echo "Broadcast for abox.store.client already send"
       adb shell am broadcast -a abox.store.client.ACTION_START -n abox.store.client/.receiver.StoreBroadcastReceiver
       }
+open_factory(){
+tab
+echo "Последовательный перебор всех  вариантов вызова factory_menu "
+tab
+echo "send HiKeen(RTK2851/RTK2842) SOURCE>2580"
+  adb shell am start -n 'com.hikeen.factorymenu/com.hikeen.factorymenu.FactoryMenuActivity'  2> /dev/null 1> /dev/null
+  sleep 1
+echo ""
+
+echo "send CVTE(MTK55xx/SK506/SK706) HOME.SOURCE>ATV>MENU>1147"
+  adb shell am startservice -n com.cvte.fac.menu/com.cvte.fac.menu.app.TvMenuWindowManagerService --es com.cvte.fac.menu.commmand com.cvte.fac.menu.commmand.factory_menu  2> /dev/null 1> /dev/null
+  sleep 1
+echo ""
+echo "send KTC(6681) SOURCE>ATV>MENU>8202"
+  adb shell am start -n kgzn.factorymenu.ui/mediatek.tvsetting.factory.ui.kgznfactorymenu.FactoryMenuActivity  2> /dev/null 1> /dev/null
+  sleep 1
+tab
+}
+
 
 #Очистка кэша приложения
 clear_data() {
@@ -459,6 +500,10 @@ for arg in "$@"; do
             ;;
       ${K_RFAV})
             readfromapkversion
+            shift 1
+            ;;
+      ${K_OPEN_FACT})
+            open_factory
             shift 1
             ;;
       ${K_DIFF_VERSION})
