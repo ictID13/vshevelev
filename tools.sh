@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 ########################################
+
 K_GET_IP="--get_ip"
 K_CONNECT="--connect"
 K_DISCONNECT="--disconnect"
@@ -30,13 +31,16 @@ ALL_KEYWORDS=( "${K_OPEN_FACT}" "${K_INSTALL}" "${K_RFAV}" "${K_GETPROP}" "${K_G
 TOOL=~/.tool/
 WHITELIST=(${TOOL}list_ip.txt)
 IP=$(cat ${WHITELIST})
+
 WHITEEX=(${TOOL}ip_ex.txt)
 IPX=$(cat ${WHITEEX})
+
 MODULES_INSTALL=(${TOOL}modules.install)
 MODULES_UNINSTALL=(${TOOL}modules.uninstall)
 
 APKFILES=$(cat ${MODULES_INSTALL})
 TEMP_DIFF_NEW_OLD=(${TOOL}app_diff_new_old.txt)
+
 FIND=su
 PKG=store
 ACTIVITY=.ui.MainActivity
@@ -70,25 +74,27 @@ cat << EOF
 Usage: $(basename "$0") <commands>
 Simple cli helper for android client.
 Default: build, install apk and launch main activity.
-  ${K_GET_IP}
-  ${K_CONNECT}
-  ${K_DISCONNECT}
-  ${K_CONNECT2ALL_SEND_BROADCAST}
-  ${K_GETPROP}
-  ${K_INSTALL_PAK}
-  ${K_LOGCAT}
-  ${K_UNINST}
-  ${K_UNINST_PAK}
-  ${K_UNINST_DIFF}
+  ${K_GET_IP}                      scan network to open port 5555
+  ${K_CONNECT}                     simple adb connect
+  ${K_DISCONNECT}                  simple disconnect
+  ${K_CONNECT2ALL_SEND_BROADCAST}  connect to ip-list and send broadcast
+  ${K_GETPROP}                     get prop list
+  ${K_INSTALL}                     adb install
+  ${K_INSTALL_PAK}            install pack apk from current directory
+  ${K_LOGCAT}                  logcat
+  ${K_OPEN_FACT}                open factory menu
+  ${K_UNINST}                   adb uninstall
+  ${K_UNINST_PAK}          uninstall pack apk
+  ${K_UNINST_DIFF}          uninstall diff version app
   ${K_SEND}
-  ${K_STOP_APP}
-  ${K_GET_NAME}
-  ${K_GET_VERS}
-  ${K_DIFF_VERSION}
-  ${K_FIND}
-  ${K_MONKEY}
-  ${K_CLEAR_DATA}
-  ${K_RFAV}
+  ${K_STOP_APP}                    force-stop app
+  ${K_GET_NAME}                get app name
+  ${K_GET_VERS}        get app version
+  ${K_DIFF_VERSION}       diff version
+  ${K_FIND}             find on android device
+  ${K_MONKEY}                 run monkey monkey test
+  ${K_CLEAR_DATA}                  pm clear
+  ${K_RFAV}          read name app from apk
   ${K_HELP}            Show this help and exit
 EOF
 }
@@ -136,9 +142,9 @@ connect2all_send_broadcast(){
     echo "Success"
 #    return 0
 getprop
+sleep 1
+get_app_name_version  |grep abox.store.client
 #echo > ${MODULES_UNINSTALL}
-adb uninstall abox.store.client
-
 #get_app_name >> ${MODULES_UNINSTALL}
 #uninstall_pack_apk
 
@@ -149,24 +155,9 @@ adb uninstall abox.store.client
 
 #Установка отдельных apk
 install(){
-  for IPS in ${IPX}; do
-            disconnect
-            tab
-            echo "Try connect to ${IPS}"
-            timeout 3 adb connect ${IPS}:5555  2> /dev/null 1> /dev/null
-            if [ $? -ne 0 ] ; then
-        echo "Failed to connect"
-    fi
-    echo "Success"
-#    return 0
-echo "install abox.store.client"
-  sleep 1
   adb install -r /Users/Viktor/Documents/PROJECTS/STORE.CLIENT/APP/abox.store.client_20191226.apk
-  sleep 1
-  adb shell reboot
-    done
+sleep 1
   disconnect
-
 }
 
 
@@ -180,7 +171,6 @@ install_pack_apk(){
             tab
             echo "Installing  ${APK}"
             adb install -r ${APK} # 2> /dev/null 1> /dev/null
-
             if [ $? -ne 0 ] ; then
         echo "Failed to install ${APK}"
     fi
@@ -192,24 +182,20 @@ install_pack_apk(){
 getprop(){
 echo "Получение getprop:"
 adb shell getprop |grep -E "(sys.wildred.hw_id|sys.wildred.brand|ro.product.brand|ro.product.device|ro.product.model|sys.wildred.version|ro.build.version.min_supported_target_sdk|ro.build.version.sdk|ro.build.date.utc|ro.build.date|ro.sf.lcd_density|qemu.sf.lcd_density|vendor.display-size|smarttv.current.apk.activity|smarttv.current.apk.package|ro.main.version|ro.main.version.date)"
-
 # > ~/.tool/${IPS}.txt
-
 }
 
 
 #Monkey test для выбранного приложения
 monkey_test(){
 echo  ho -n "По какому приложению будем проводить monkey-тест?default(com.family.atlas.launcher) :"
-read PACKAGE
+  read PACKAGE
 echo -n "Задержка между событиями в ms ?default(100ms) :"
-read THROTTLE
+  read THROTTLE
 echo -n "Количество событий?default(1000) :"
-read EVENT
+  read EVENT
 adb shell monkey -p ${PACKAGE:=com.family.atlas.launcher} --pct-touch 0 --pct-motion 20 --pct-nav 20 --pct-majornav 10 --pct-syskeys 40 --pct-appswitch 10 --ignore-security-exceptions --throttle ${THROTTLE:=100}  -vv ${EVENT:=1000}
-
         adb shell kill $(adb shell pidof com.android.commands.monkey)
-
 }
 
 #Остановка приложения abox.store
@@ -372,7 +358,6 @@ echo "send HiKeen(RTK2851/RTK2842) SOURCE>2580"
   adb shell am start -n 'com.hikeen.factorymenu/com.hikeen.factorymenu.FactoryMenuActivity'  2> /dev/null 1> /dev/null
   sleep 1
 echo ""
-
 echo "send CVTE(MTK55xx/SK506/SK706) HOME.SOURCE>ATV>MENU>1147"
   adb shell am startservice -n com.cvte.fac.menu/com.cvte.fac.menu.app.TvMenuWindowManagerService --es com.cvte.fac.menu.commmand com.cvte.fac.menu.commmand.factory_menu  2> /dev/null 1> /dev/null
   sleep 1
