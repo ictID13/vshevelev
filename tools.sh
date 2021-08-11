@@ -47,7 +47,6 @@ ACTIVITY=.ui.MainActivity
 APPDEF=(${TOOL}app_stock.txt)
 APPCUR=(${TOOL}app_updated.txt)
 
-
 ###################Проверки темповых файлов#####################
 # Проверка наличия папки, создание
   mkdir -p ~/.tool
@@ -416,13 +415,6 @@ date
 tab
 echo ""
 echo ""
-
-#  sleep 1
-#  adb shell getprop |grep -E "(sys.wildred.hw_id|sys.wildred.brand|ro.build.version.min_supported_target_sdk|ro.build.version.sdk)"
-#  echo "reboot "
-#  adb shell reboot
-#    done
-
 
 
 for arg in "$@"; do
