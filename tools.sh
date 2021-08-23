@@ -144,21 +144,10 @@ cat /dev/null>${TEMP}
             check
             get_app_name_version |grep abox.store
             sleep 1
-            echo -n "uninstall  :"
-            adb uninstall abox.store.client
-            sleep 1
-            echo "Done"
-            get_app_name_version |grep abox.store
-            sleep 1
-            echo -n "install  :"
-            install
-            echo "Done"
-            sleep 1
-            get_app_name_version |grep abox.store
-            sleep 1
-            echo -n "DO REBOOT"
+            echo -n "DO REBOOT :"
             adb shell reboot
             echo "Done"
+
     done
 disconnect
 }
@@ -326,9 +315,11 @@ get_logcat(){
       timeout 3 adb connect ${IPS}:5555  2> /dev/null 1> /dev/null
       check
       sleep 1
+      getprop
+      sleep 1
       get_app_name_version |grep "abox.store.client"
       echo -n "Receiving logcat: "
-      adb logcat |grep -E "(pushLOG|push|pushId = 243)" > ${TEMP} &
+      adb logcat |grep -E "(pushLOG|push|pushId = )" > ${TEMP} &
       sleep 5
       adb shell kill $(adb shell pidof logcat)
       echo "Done"
@@ -546,9 +537,3 @@ for arg in "$@"; do
 	      ;;
 	  esac
 done
-
-
-
-
-
-
