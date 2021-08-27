@@ -142,19 +142,17 @@ cat /dev/null>${TEMP}
             echo -n "Connecting to ${IPS} :"
             timeout 3 adb connect ${IPS}:5555  2> /dev/null 1> /dev/null
             check
-            get_app_name_version |grep abox.store
-            sleep 1
-            echo -n "DO REBOOT :"
-            adb shell reboot
-            echo "Done"
-
+            getprop
+            tab
+            adb shell getprop
+            tab
     done
 disconnect
 }
 
 #Установка отдельных apk
 install(){
-  APP=/Users/Viktor/Downloads/abox.store.client.apk
+  APP=/Users/Viktor/Documents/PROJECTS/CLOUD_GAMES/APP/ru_wildred_game_nonRoot-debug_v_8.38_838_04.08.2021_1628076000041.apk
   adb install -r ${APP} 2>/dev/null 1>/dev/null
   sleep 1
 }
@@ -319,8 +317,9 @@ get_logcat(){
       sleep 1
       get_app_name_version |grep "abox.store.client"
       echo -n "Receiving logcat: "
-      adb logcat |grep -E "(pushLOG|push|pushId = )" > ${TEMP} &
-      sleep 5
+#      adb logcat |grep -E "(pushLOG|push|pushId = )" > ${TEMP} &
+      adb logcat > ${TEMP} &
+      sleep 40
       adb shell kill $(adb shell pidof logcat)
       echo "Done"
       cat ${TEMP}
