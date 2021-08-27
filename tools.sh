@@ -145,7 +145,6 @@ cat /dev/null>${TEMP}
             getprop
             echo "Hello world"
             tab
-            adb shell getprop
             tab
     done
 disconnect
