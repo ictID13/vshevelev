@@ -143,6 +143,7 @@ cat /dev/null>${TEMP}
             timeout 3 adb connect ${IPS}:5555  2> /dev/null 1> /dev/null
             check
             getprop
+            echo "Hello world"
             tab
             adb shell getprop
             tab
